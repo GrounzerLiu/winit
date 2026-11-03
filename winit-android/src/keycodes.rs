@@ -183,6 +183,13 @@ pub fn character_map_and_combine_key(
 ) -> Option<KeyMapChar> {
     let device_id = key_event.device_id();
 
+    // Soft keyboards report device id 0, which has no KeyCharacterMap; asking for one logs an
+    // error on every key and cannot produce a character anyway. Text arrives through GameTextInput
+    // (InputEvent::TextEvent) instead.
+    if device_id == 0 {
+        return None;
+    }
+
     let key_map = match app.device_key_character_map(device_id) {
         Ok(key_map) => key_map,
         Err(err) => {
