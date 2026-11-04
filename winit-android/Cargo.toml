@@ -1,12 +1,15 @@
 [package]
-description = "Winit's Android backend"
-documentation = "https://docs.rs/winit-android"
+description = "Winia's Android backend for the winia-winit fork."
+documentation = "https://docs.rs/winia-winit-android"
 edition.workspace = true
 license.workspace = true
-name = "winit-android"
+name = "winia-winit-android"
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
+
+[lib]
+name = "winit_android"
 
 [features]
 game-activity = ["android-activity/game-activity"]

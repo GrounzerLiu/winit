@@ -1,14 +1,17 @@
 [package]
 categories = ["gui"]
-description = "Cross-platform window creation library."
-documentation = "https://docs.rs/winit"
+description = "Winia's fork of winit, with Android IME support (library name: winit)."
+documentation = "https://docs.rs/winia-winit"
 edition.workspace = true
 keywords = ["windowing"]
 license.workspace = true
-name = "winit"
+name = "winia-winit"
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
+
+[lib]
+name = "winit"
 
 [package.metadata.docs.rs]
 features = [

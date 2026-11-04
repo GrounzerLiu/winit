@@ -6,15 +6,15 @@ resolver = "3"
 [workspace.package]
 edition = "2024"
 license = "Apache-2.0"
-repository = "https://github.com/rust-windowing/winit"
+repository = "https://github.com/GrounzerLiu/winit"
 rust-version = "1.86"
 version = "0.31.0-beta.4"
 
 [workspace.dependencies]
 # Workspace dependencies.
 # `winit` has no version here to allow using it in dev deps for docs.
-winit = { path = "winit" }
-winit-android = { version = "=0.31.0-beta.4", path = "winit-android" }
+winit = { package = "winia-winit", path = "winit" }
+winit-android = { package = "winia-winit-android", version = "=0.31.0-beta.4", path = "winit-android" }
 winit-appkit = { version = "=0.31.0-beta.4", path = "winit-appkit" }
 winit-common = { version = "=0.31.0-beta.4", path = "winit-common" }
 winit-core = { version = "=0.31.0-beta.4", path = "winit-core" }
