@@ -37,6 +37,11 @@ use crate::keycodes;
 
 static HAS_FOCUS: AtomicBool = AtomicBool::new(true);
 
+/// Whether an Android event loop is currently alive. Android can destroy and relaunch the
+/// activity in the same process (for example when entering split-screen); the old native loop
+/// must be allowed to exit and the next activity must be allowed to create a new event loop.
+static EVENT_LOOP_CREATED: AtomicBool = AtomicBool::new(false);
+
 /// Returns the minimum `Option<Duration>`, taking into account that `None`
 /// equates to an infinite timeout, not a zero timeout (so can't just use
 /// `Option::min`)
@@ -117,6 +122,13 @@ pub struct EventLoop {
     combining_accent: Option<char>,
 }
 
+impl Drop for EventLoop {
+    fn drop(&mut self) {
+        // The activity may be relaunched in this process after the native loop exits.
+        EVENT_LOOP_CREATED.store(false, Ordering::Relaxed);
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PlatformSpecificEventLoopAttributes {
     pub android_app: Option<AndroidApp>,
@@ -134,7 +146,6 @@ const GLOBAL_WINDOW: WindowId = WindowId::from_raw(0);
 
 impl EventLoop {
     pub fn new(attributes: &PlatformSpecificEventLoopAttributes) -> Result<Self, EventLoopError> {
-        static EVENT_LOOP_CREATED: AtomicBool = AtomicBool::new(false);
         if EVENT_LOOP_CREATED.swap(true, Ordering::Relaxed) {
             // For better cross-platformness.
             return Err(EventLoopError::RecreationAttempt);
@@ -252,9 +263,11 @@ impl EventLoop {
                     app.suspended(self.window_target());
                 },
                 MainEvent::Destroy => {
-                    // XXX: maybe exit mainloop to drop things before being
-                    // killed by the OS?
-                    warn!("TODO: forward onDestroy notification to application");
+                    // The activity is being destroyed. Android's GameActivity.onDestroy waits
+                    // for the Rust entry thread to return, so an ignored Destroy keeps the
+                    // process in an ANR while the framework is relaunching the activity.
+                    warn!("App destroyed - exiting the native main loop");
+                    self.window_target.exit();
                 },
                 MainEvent::InsetsChanged { .. } => {
                     // XXX: how to forward this state to applications?
